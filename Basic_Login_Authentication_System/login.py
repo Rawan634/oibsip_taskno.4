@@ -1,0 +1,124 @@
+import tkinter as tk
+import bcrypt
+
+users = {}
+
+def show_reg():
+    main_frame.pack_forget()
+    reg_frame.pack()
+
+def show_login():
+    main_frame.pack_forget()
+    login_frame.pack()
+
+def reg():
+    username = reg_username_entry.get().strip()
+    password = reg_password_entry.get().strip()
+
+    if username == "" or password == "":
+        reg_result_label.config(text="Please enter both username and password.", fg="red")
+        return
+
+    if username in users:
+        reg_result_label.config(text="Username already taken. Please choose another one.", fg="red")
+    else:
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        users[username] = hashed_password
+        reg_result_label.config(text="Registration successful!", fg="green")
+
+def log():
+    username = login_username_entry.get().strip()
+    password = login_password_entry.get().strip()
+
+    if username == "" or password == "":
+        login_result_label.config(text="Please enter both username and password.", fg="red")
+        return
+
+    if username in users and bcrypt.checkpw(password.encode('utf-8'), users[username]):
+        login_result_label.config(text=f"Welcome back, {username}!", fg="green")
+        secured()
+    else:
+        login_result_label.config(text="Invalid username or password.", fg="red")
+
+def secured():
+    login_frame.pack_forget()
+    reg_frame.pack_forget()
+    secured_label.config(text="Welcome to the secured page.")
+    secured_label.pack()
+
+def show_options():
+    login_frame.pack_forget()
+    reg_frame.pack_forget()
+    secured_label.pack_forget()
+    main_frame.pack()
+
+window = tk.Tk()
+window.title("Login App")
+
+screen_width = window.winfo_screenwidth()
+screen_height = window.winfo_screenheight()
+
+window_width = 400
+window_height = 300
+x_pos = int((screen_width - window_width) / 2)
+y_pos = int((screen_height - window_height) / 2)
+
+window.geometry(f"{window_width}x{window_height}+{x_pos}+{y_pos}")
+
+main_frame = tk.Frame(window)
+
+tk.Label(main_frame, text="Options:", font=("Arial", 14)).pack(pady=10)
+
+reg_button = tk.Button(main_frame, text="1. Register", command=show_reg)
+reg_button.pack()
+
+login_button = tk.Button(main_frame, text="2. Login", command=show_login)
+login_button.pack()
+
+main_frame.pack()
+
+reg_frame = tk.Frame(window)
+
+tk.Label(reg_frame, text="Registration", font=("Arial", 14)).pack(pady=10)
+
+tk.Label(reg_frame, text="Username:").pack()
+reg_username_entry = tk.Entry(reg_frame)
+reg_username_entry.pack()
+
+tk.Label(reg_frame, text="Password:").pack()
+reg_password_entry = tk.Entry(reg_frame, show="*")
+reg_password_entry.pack()
+
+register_button = tk.Button(reg_frame, text="Register", command=reg)
+register_button.pack()
+
+reg_result_label = tk.Label(reg_frame, text="", fg="black")
+reg_result_label.pack()
+
+back_button = tk.Button(reg_frame, text="Back to Options", command=show_options)
+back_button.pack()
+
+login_frame = tk.Frame(window)
+
+tk.Label(login_frame, text="Login", font=("Arial", 14)).pack(pady=10)
+
+tk.Label(login_frame, text="Username:").pack()
+login_username_entry = tk.Entry(login_frame)
+login_username_entry.pack()
+
+tk.Label(login_frame, text="Password:").pack()
+login_password_entry = tk.Entry(login_frame, show="*")
+login_password_entry.pack()
+
+login_button = tk.Button(login_frame, text="Login", command=log)
+login_button.pack()
+
+login_result_label = tk.Label(login_frame, text="", fg="black")
+login_result_label.pack()
+
+back_button = tk.Button(login_frame, text="Back to Options", command=show_options)
+back_button.pack()
+
+secured_label = tk.Label(window, text="", fg="blue")
+
+window.mainloop()
